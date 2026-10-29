@@ -1,0 +1,12 @@
+name: local
+values:
+  - key: baseUrl
+    value: ''
+  - key: contratId
+    value: ''
+  - key: vehiculeId
+    value: ''
+  - key: agenceId
+    value: ''
+  - key: clientId
+    value: ''

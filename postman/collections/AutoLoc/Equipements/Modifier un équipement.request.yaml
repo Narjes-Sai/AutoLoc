@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/equipements/{{equipementId}}"
+method: PUT
+body:
+  type: json
+  content: '{ "libelle": "GPS premium" }'
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r
+
+      pm.test(\"Libellé modifié\", () => pm.expect(pm.response.json().libelle).to.eql(\"GPS premium\"));"
+    language: text/javascript
+order: 5000

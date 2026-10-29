@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/reservations/{{reservationId}}"
+method: PUT
+body:
+  type: json
+  content: '{ "dateDebut": "2026-11-02", "dateFin": "2026-11-07", "statut": "CONFIRMEE" }'
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r
+
+      pm.test(\"Statut CONFIRMEE\", () => pm.expect(pm.response.json().statut).to.eql(\"CONFIRMEE\"));"
+    language: text/javascript
+order: 5000

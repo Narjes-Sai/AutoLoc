@@ -1,0 +1,11 @@
+$kind: http-request
+url: "{{baseUrl}}/api/agences/{{agenceId}}"
+method: PUT
+body:
+  type: json
+  content: '  { "nom": "Agence Sfax", "ville": "Sfax", "adresse": "5 Rue de la Liberté", "telephone": "74000000" }'
+scripts:
+  - type: afterResponse
+    code: pm.test("Statut 200", () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 5000

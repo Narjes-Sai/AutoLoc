@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{baseUrl}}/api/contrats"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"dateSignature\": \"2026-11-02\",\r
+
+    \  \"montantTotal\": 480.00,\r
+
+    \  \"valide\": true,\r
+
+    \  \"paiements\": [\r
+
+    \    { \"montant\": 150.00, \"datePaiement\": \"2026-11-02\", \"modePaiement\": \"CARTE\" },\r
+
+    \    { \"montant\": 330.00, \"datePaiement\": \"2026-11-06\", \"modePaiement\": \"VIREMENT\" }\r
+
+    \  ]\r
+
+    }"
+order: 5000

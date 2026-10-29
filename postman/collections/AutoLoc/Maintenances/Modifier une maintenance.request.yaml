@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/maintenances/{{maintenanceId}}"
+method: PUT
+body:
+  type: json
+  content: '{ "dateDebut": "2026-11-02", "dateFin": "2026-11-03", "description": "Vidange et freins" }'
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r
+
+      pm.test(\"Description modifiée\", () => pm.expect(pm.response.json().description).to.eql(\"Vidange et freins\"));"
+    language: text/javascript
+order: 5000

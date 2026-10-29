@@ -1,0 +1,29 @@
+$kind: http-request
+url: "{{baseUrl}}/api/vehicules"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"immatriculation\": \"123 TUN 4567\",\r
+
+    \  \"marque\": \"Renault\",\r
+
+    \  \"modele\": \"Clio\",\r
+
+    \  \"categorie\": \"CITADINE\",\r
+
+    \  \"tarifJournalier\": 80.00,\r
+
+    \  \"statut\": \"DISPONIBLE\",\r
+
+    \  \"agence\": { \"idAgence\": {{agenceId}} }\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: "   pm.test(\"Statut 201\", () => pm.response.to.have.status(201));\r
+
+      \   pm.environment.set(\"vehiculeId\", pm.response.json().idVehicule);"
+    language: text/javascript
+order: 1000

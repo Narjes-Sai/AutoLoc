@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/vehicules/{{vehiculeId}}"
+method: PUT
+body:
+  type: json
+  content: '{ "immatriculation": "123 TUN 4567", "marque": "Renault", "modele": "Clio", "categorie": "BERLINE", "tarifJournalier": 95.00, "statut": "LOUE" }'
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r
+
+      pm.test(\"Statut LOUE\", () => pm.expect(pm.response.json().statut).to.eql(\"LOUE\"));"
+    language: text/javascript
+order: 5000

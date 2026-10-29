@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/clients/{{clientId}}"
+method: PUT
+body:
+  type: json
+  content: '{ "nom": "Ben Ali", "prenom": "Samir", "email": "sami@test.com", "telephone": "20000000", "numPermis": "P123456", "dateInscription": "2026-11-01" }'
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Statut 200\", () => pm.response.to.have.status(200));\r
+
+      pm.test(\"Prénom modifié\", () => pm.expect(pm.response.json().prenom).to.eql(\"Samir\"));"
+    language: text/javascript
+order: 5000

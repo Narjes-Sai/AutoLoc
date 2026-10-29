@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/api/reservations/{{reservationId}}"
+method: DELETE
+order: 6000

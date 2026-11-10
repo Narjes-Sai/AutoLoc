@@ -1,39 +1,53 @@
 package tn.esprit.autoloc.web.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import tn.esprit.autoloc.domain.Paiement;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import tn.esprit.autoloc.dto.PaiementRequestDTO;
+import tn.esprit.autoloc.dto.PaiementResponseDTO;
 import tn.esprit.autoloc.service.IPaiementService;
 
 @RestController
 @RequestMapping("/paiements")
 @RequiredArgsConstructor
-@Tag(name = "Paiements", description = "Consultation des paiements (lecture seule)")
+@Tag(name = "Paiements", description = "Gestion des paiements")
 public class PaiementController {
 
     private final IPaiementService paiementService;
 
     @Operation(summary = "Lister les paiements")
-    @ApiResponse(responseCode = "200", description = "Liste des paiements")
     @GetMapping
-    public List<Paiement> findAll() {
+    public List<PaiementResponseDTO> findAll() {
         return paiementService.findAll();
     }
 
     @Operation(summary = "Consulter un paiement")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Paiement trouvé"),
-            @ApiResponse(responseCode = "404", description = "Paiement introuvable")})
     @GetMapping("/{id}")
-    public Paiement findById(@PathVariable Long id) {
+    public PaiementResponseDTO findById(@PathVariable Long id) {
         return paiementService.findById(id);
+    }
+
+    @Operation(summary = "Créer un paiement")
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public PaiementResponseDTO create(@Valid @RequestBody PaiementRequestDTO dto) {
+        return paiementService.create(dto);
+    }
+
+    @Operation(summary = "Modifier un paiement")
+    @PutMapping("/{id}")
+    public PaiementResponseDTO update(@PathVariable Long id, @Valid @RequestBody PaiementRequestDTO dto) {
+        return paiementService.update(id, dto);
+    }
+
+    @Operation(summary = "Supprimer un paiement")
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteById(@PathVariable Long id) {
+        paiementService.deleteById(id);
     }
 }

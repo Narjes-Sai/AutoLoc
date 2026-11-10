@@ -4,44 +4,47 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.esprit.autoloc.domain.Maintenance;
+import tn.esprit.autoloc.domain.Vehicule;
+import tn.esprit.autoloc.dto.MaintenanceRequestDTO;
+import tn.esprit.autoloc.dto.MaintenanceResponseDTO;
 import tn.esprit.autoloc.exception.ResourceNotFoundException;
+import tn.esprit.autoloc.mapper.MaintenanceMapper;
 import tn.esprit.autoloc.repository.IMaintenanceRepository;
+import tn.esprit.autoloc.repository.IVehiculeRepository;
 
 @Service
 @RequiredArgsConstructor
 public class MaintenanceServiceImpl implements IMaintenanceService {
 
     private final IMaintenanceRepository maintenanceRepository;
+    private final IVehiculeRepository vehiculeRepository;
+    private final MaintenanceMapper maintenanceMapper;
 
     @Override
-    public Maintenance create(Maintenance maintenance) {
-        if (maintenance.getIdMaintenance() != null) {
-            throw new IllegalArgumentException(
-                    "Une nouvelle maintenance ne doit pas avoir d'identifiant");
-        }
-        verifierRegles(maintenance);
-        return maintenanceRepository.save(maintenance);
+    public MaintenanceResponseDTO create(MaintenanceRequestDTO dto) {
+        verifierRegles(dto);
+        Maintenance maintenance = maintenanceMapper.toEntity(dto);
+        maintenance.setVehicule(trouverVehicule(dto.idVehicule()));
+        return maintenanceMapper.toResponse(maintenanceRepository.save(maintenance));
     }
 
     @Override
-    public Maintenance findById(Long id) {
-        return maintenanceRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Maintenance", id));
+    public MaintenanceResponseDTO findById(Long id) {
+        return maintenanceMapper.toResponse(trouver(id));
     }
 
     @Override
-    public List<Maintenance> findAll() {
-        return maintenanceRepository.findAll();
+    public List<MaintenanceResponseDTO> findAll() {
+        return maintenanceRepository.findAll().stream().map(maintenanceMapper::toResponse).toList();
     }
 
     @Override
-    public Maintenance update(Long id, Maintenance maintenance) {
-        Maintenance existante = findById(id);
-        verifierRegles(maintenance);
-        existante.setDateDebut(maintenance.getDateDebut());
-        existante.setDateFin(maintenance.getDateFin());
-        existante.setDescription(maintenance.getDescription());
-        return maintenanceRepository.save(existante);
+    public MaintenanceResponseDTO update(Long id, MaintenanceRequestDTO dto) {
+        Maintenance existant = trouver(id);
+        verifierRegles(dto);
+        maintenanceMapper.updateEntity(existant, dto);
+        existant.setVehicule(trouverVehicule(dto.idVehicule()));
+        return maintenanceMapper.toResponse(maintenanceRepository.save(existant));
     }
 
     @Override
@@ -52,11 +55,19 @@ public class MaintenanceServiceImpl implements IMaintenanceService {
         maintenanceRepository.deleteById(id);
     }
 
-    private void verifierRegles(Maintenance maintenance) {
-        if (maintenance.getDateDebut() != null && maintenance.getDateFin() != null
-                && maintenance.getDateFin().isBefore(maintenance.getDateDebut())) {
-            throw new IllegalArgumentException(
-                    "La date de fin ne peut pas être antérieure à la date de début");
+    private Maintenance trouver(Long id) {
+        return maintenanceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Maintenance", id));
+    }
+
+    private Vehicule trouverVehicule(Long idVehicule) {
+        return vehiculeRepository.findById(idVehicule)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicule", idVehicule));
+    }
+
+    private void verifierRegles(MaintenanceRequestDTO dto) {
+        if (dto.dateFin() != null && dto.dateFin().isBefore(dto.dateDebut())) {
+            throw new IllegalArgumentException("La date de fin ne peut pas précéder la date de début");
         }
     }
 }

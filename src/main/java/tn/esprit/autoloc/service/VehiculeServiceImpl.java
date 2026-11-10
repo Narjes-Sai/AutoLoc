@@ -4,7 +4,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tn.esprit.autoloc.domain.Vehicule;
+import tn.esprit.autoloc.dto.VehiculeRequestDTO;
+import tn.esprit.autoloc.dto.VehiculeResponseDTO;
 import tn.esprit.autoloc.exception.ResourceNotFoundException;
+import tn.esprit.autoloc.mapper.VehiculeMapper;
 import tn.esprit.autoloc.repository.IVehiculeRepository;
 
 @Service
@@ -12,39 +15,33 @@ import tn.esprit.autoloc.repository.IVehiculeRepository;
 public class VehiculeServiceImpl implements IVehiculeService {
 
     private final IVehiculeRepository vehiculeRepository;
+    private final VehiculeMapper vehiculeMapper;
 
     @Override
-    public Vehicule create(Vehicule vehicule) {
-        if (vehicule.getIdVehicule() != null) {
-            throw new IllegalArgumentException(
-                    "Un nouveau véhicule ne doit pas avoir d'identifiant");
-        }
+    public VehiculeResponseDTO create(VehiculeRequestDTO dto) {
+        Vehicule vehicule = vehiculeMapper.toEntity(dto);
         verifierRegles(vehicule);
-        return vehiculeRepository.save(vehicule);
+        return vehiculeMapper.toResponse(vehiculeRepository.save(vehicule));
     }
 
     @Override
-    public Vehicule findById(Long id) {
-        return vehiculeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicule", id));
+    public VehiculeResponseDTO findById(Long id) {
+        return vehiculeMapper.toResponse(trouver(id));
     }
 
     @Override
-    public List<Vehicule> findAll() {
-        return vehiculeRepository.findAll();
+    public List<VehiculeResponseDTO> findAll() {
+        return vehiculeRepository.findAll().stream()
+                .map(vehiculeMapper::toResponse)
+                .toList();
     }
 
     @Override
-    public Vehicule update(Long id, Vehicule vehicule) {
-        Vehicule existant = findById(id);
-        verifierRegles(vehicule);
-        existant.setImmatriculation(vehicule.getImmatriculation());
-        existant.setMarque(vehicule.getMarque());
-        existant.setModele(vehicule.getModele());
-        existant.setCategorie(vehicule.getCategorie());
-        existant.setTarifJournalier(vehicule.getTarifJournalier());
-        existant.setStatut(vehicule.getStatut());
-        return vehiculeRepository.save(existant);
+    public VehiculeResponseDTO update(Long id, VehiculeRequestDTO dto) {
+        Vehicule existant = trouver(id);
+        vehiculeMapper.updateEntity(existant, dto);
+        verifierRegles(existant);
+        return vehiculeMapper.toResponse(vehiculeRepository.save(existant));
     }
 
     @Override
@@ -53,6 +50,11 @@ public class VehiculeServiceImpl implements IVehiculeService {
             throw new ResourceNotFoundException("Vehicule", id);
         }
         vehiculeRepository.deleteById(id);
+    }
+
+    private Vehicule trouver(Long id) {
+        return vehiculeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Vehicule", id));
     }
 
     private void verifierRegles(Vehicule vehicule) {
